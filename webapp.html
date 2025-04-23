@@ -70,9 +70,28 @@
   <h1>2048 Game</h1>
   <div id="game"></div>
 
+  <div id="gameOver" style="display:none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.85); color: white; padding: 30px; border-radius: 10px; text-align: center; z-index: 10;">
+    <h2>Game Over</h2>
+    <p>No more moves left!</p>
+    <button onclick="restartGame()" style="margin-top: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer;">Play Again</button>
+  </div>
+
+  <div id="gameWin" style="display:none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+  background: rgba(0,128,0,0.9); color: white; padding: 30px; border-radius: 10px; text-align: center; z-index: 10;">
+    <h2>🎉 Congratulations!</h2>
+    <p>You reached 2048!</p>
+    <button onclick="continueGame()" style="margin: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer;">Keep Playing</button>
+    <button onclick="restartGame()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Restart</button>
+  </div>
+
+
+
+
   <script>
     const game = document.getElementById('game');
     let grid = [];
+    let hasWon = false;
 
     function init() {
       for (let i = 0; i < 4; i++) {
@@ -95,12 +114,23 @@
           cell.className = 'cell';
           if (val) {
             cell.textContent = val;
+            if (val === 2048 && !hasWon) {
+                hasWon = true;
+                setTimeout(() => {
+                    document.getElementById('gameWin').style.display = 'block';
+                }, 100);
+            }
             cell.setAttribute('data-value', val);
           }
           game.appendChild(cell);
         }
       }
     }
+
+    function continueGame() {
+     document.getElementById('gameWin').style.display = 'none';
+    }
+
 
     function addNumber() {
       let empty = [];
@@ -138,6 +168,27 @@
       grid = newGrid;
     }
 
+    function isGameOver() {
+  // If there's a 0 anywhere, game isn't over
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+        if (grid[i][j] === 0) return false;
+
+        // Check right and down for merge possibility
+        if (j < 3 && grid[i][j] === grid[i][j + 1]) return false;
+        if (i < 3 && grid[i][j] === grid[i + 1][j]) return false;
+        }
+      }
+      return true;
+    }
+
+    function restartGame() {
+        document.getElementById('gameOver').style.display = 'none';
+        document.getElementById('gameWin').style.display = 'none';
+        hasWon = false;
+        init();
+    }
+
     function handleInput(key) {
       let moved = false;
 
@@ -166,6 +217,10 @@
         addNumber();
         draw();
       }
+      if (isGameOver()) {
+        document.getElementById('gameOver').style.display = 'block';
+      }
+
     }
 
     window.addEventListener('keydown', (e) => {
